@@ -1,0 +1,11 @@
+# database configuration
+database:
+  test:
+    adapter: mysql2
+    database: webhooks_test
+  development:
+    adapter: mysql2
+    database: webhooks_development
+  production:
+    adapter: mysql2
+    database: webhooks_production

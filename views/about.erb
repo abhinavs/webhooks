@@ -1,0 +1,151 @@
+<!DOCTYPE>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>webhooks.io</title>
+    <meta name="author" content="Abhinav Saxena">
+    <link href='http://fonts.googleapis.com/css?family=Habibi' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Abel' rel='stylesheet' type='text/css'>
+    <style type="text/css" media="screen">
+      html, body, div, span, applet, object, iframe,
+      h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+      a, abbr, acronym, address, big, cite, code,
+      del, dfn, em, font, img, ins, kbd, q, s, samp,
+      small, strike, strong, sub, sup, tt, var,
+      b, u, i, center,
+      dl, dt, dd, ol, ul, li,
+      fieldset, form, label, legend,
+      table, caption, tbody, tfoot, thead, tr, th, td {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        font-size: 100%;
+        vertical-align: baseline;
+        background: transparent;
+      }
+      body {
+        line-height: 1;
+      }
+
+      /* end reset, start styles */
+      body { font-family: 'Abel', 'Habibi', Helvetica, Arial; background: url("/images/texture.png") #225533 /*#7EB3CD; #D5E9F6;*/}
+      #container { width: 960px; margin: 0 auto; background-color: #FFF; padding-right: 5em; padding-left: 5em; padding-top: 1em;
+        -moz-box-shadow:    0 10px 14px rgba(0, 0, 0, 0.8);
+        -webkit-box-shadow: 0 10px 14px rgba(0, 0, 0, 0.8);
+        border-left: 1px solid #DDDDDD;
+        border-right: 1px solid #DDDDDD;
+      }
+      h2, h3, h4, h5 { color: #333; }
+
+      h1 { font-size: 5.5em; text-transform: lowercase;letter-spacing: -5px; margin-bottom: 0.1em;
+        font-family: 'Habibi', Helvetica, Arial;}
+      h2 { font-size: 1.5em; text-transform: lowercase; margin-bottom: 1em; lettr-spacing: -2px; }
+      p { margin: 1em 0;}
+      pre, .highlight {background-color: #EEE; padding: 1em; border-top: 1px solid #666; border-bottom: 1px solid #666; margin: 1em 0; }
+      li { margin: 0.3em 0; }
+
+
+      #footnote { text-align: right; border-top: 1px solid #ccc; padding: 0.5em; margin: 1em 0; }
+      #footnote a { color: #333; font-size: 1em; font-style: italic; }
+      #footnote a:hover { color: #000; }
+      .gist-meta { display: none; }
+    </style>
+  </head>
+
+  <body>
+    <div id="container">
+      <h1>webhooks api</h1>
+      <h2>web service for creating webhooks</h2>
+
+      <p>Use webhooks JSON web services to create and manage webhooks </p>
+      <ul>
+        <li>
+          <h3>Publisher creates a new webhook - POST /v1/webhooks</h3>
+          <pre>
+curl -X POST http://webhooks.abhinav.co/v1/webhooks \
+-d '{
+      "name" : "my first webhook",
+      "description" : "this sends event data to all subscribers",
+      "guid" : "optional-unique-uid",
+      "email" : "myemail@domain.com",
+      "public" : false
+    }'
+
+RESPONSE
+{
+  "id" : 9999,
+  "name" : "my first webhook",
+  "description" : "this sends event data to all subscribers",
+  "guid" : "optional-unique-uid",
+  "email" : "myemail@domain.com",
+  "public" : false,
+  "publisher_key": "pk_db0eaf8e5d11e6878f96cdcbe2a9de3228622f29"
+}
+
+         </pre>
+        </li>
+
+        <li>
+        <h3>Publisher uses publisher_key to subscribe a new subscriber to the created webhook - POST /v1/webhooks/:id/subscribers <br />
+          If webhook is public (ie, "public" is set true), any body can subscribe to this webhook
+        </h3>
+          <pre>
+curl -X POST http://webhooks.abhinav.co/v1/webhooks/9999/subscribers \
+-u pk_db0eaf8e5d11e6878f96cdcbe2a9de3228622f29: \
+-d '{
+      "name" : "subscriber name",
+      "webhook_url" : "http://subscriber.com/webhook",
+    }'
+
+RESPONSE
+{
+  "id" : 121212,
+  "name" : "subscriber name",
+  "webhook_url" : "http://subscriber.com/webhook",
+  "subscriber_key": "sk_ab043192b979363020879c5bb873616ec1ff2a12"
+}
+
+          </pre>
+        </li>
+
+        <li>
+          <h3>Publisher publishes events - POST /v1/webhooks/:id/events</h3>
+          <pre>
+curl -X POST http://webhooks.abhinav.co/v1/webhooks/9999/events \
+-u pk_db0eaf8e5d11e6878f96cdcbe2a9de3228622f29: \
+-d '{
+      "event_name" : "Order.Created",
+      "event_id" : "ev_1234",
+      "data:  : "{\'event_id\':123, \'customer_name\':\'Tavishi\'}"
+      "event_url" : "http://publisher.com/events/123"
+    }'
+
+RESPONSE
+{
+  "response" : "ok"
+}
+
+         </pre>
+        </li>
+
+        <li>
+          <h3>webhooks.io manages posting event and associate data to all webhook#9999 subscribers</h3>
+        </li>
+
+        <li>
+        <h3>In addition following web services are also availabe for managing webhooks and subscriptions</h3>
+        <p>&nbsp;&nbsp;1. GET '/v1/webhooks/:guid_or_id'</p>
+        <p>&nbsp;&nbsp;2. PUT '/v1/webhooks/:guid_or_id'</p>
+        <p>&nbsp;&nbsp;3.DELETE '/v1/webhooks/:guid_or_id'</p>
+        <p>&nbsp;&nbsp;4. GET '/v1/webhooks/:guid_or_id'/events/:id/log'</p>
+        <p>&nbsp;&nbsp;5. GET '/v1/webhooks/:guid_or_id/subscribers'</p>
+        <p>&nbsp;&nbsp;6. PUT '/v1/webhooks/:guid_or_id/subscribers/:id'</p>
+        <p>&nbsp;&nbsp;7. DELETE '/v1/webhooks/:guid_or_id/subscribers/:id'</p>
+        <p> All these APIs are authenticated via publisher_key. In addition, API 5, 6, 7 are also authenticated using subscriber_key</p>
+        <br />
+        </li>
+
+      </ul>
+  </body>
+</html>
